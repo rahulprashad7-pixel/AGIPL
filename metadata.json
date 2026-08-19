@@ -1,0 +1,6 @@
+{
+  "name": "Accurate Group IT Asset Inventory",
+  "description": "Multi-organization IT asset and inventory management system for AGIPL, ASSPL, and Onyx Precision with role-based access, audit trails, warranties, and service tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

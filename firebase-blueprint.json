@@ -1,0 +1,148 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "IT staff user accounts and role assignments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique user ID" },
+        "email": { "type": "string", "description": "User email address" },
+        "name": { "type": "string", "description": "Full name" },
+        "role": { "type": "string", "enum": ["IT_MANAGER", "IT_SUPPORT", "AUDITOR"], "description": "Role in the IT department" },
+        "organization": { "type": "string", "description": "Organization code or ALL" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["id", "email", "name", "role"]
+    },
+    "Asset": {
+      "title": "Asset",
+      "description": "Hardware and IT inventory asset record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Document ID" },
+        "assetId": { "type": "string", "description": "Unique Asset ID e.g. AGIPL-DSK-001" },
+        "company": { "type": "string", "enum": ["AGIPL", "ASSPL", "ONYX"], "description": "Operating company" },
+        "assetType": { "type": "string", "description": "Type e.g. Laptop, Desktop, Server" },
+        "assetNumber": { "type": "string", "description": "Internal asset serial/tag number" },
+        "status": { "type": "string", "enum": ["ACTIVE", "IN STOCK", "SCRAPPED", "UNDER REPAIR", "RETIRED"], "description": "Lifecycle status" },
+        "assignedEmployeeName": { "type": "string", "description": "Assigned employee name" },
+        "assetUserName": { "type": "string", "description": "Primary computer username or login account" },
+        "department": { "type": "string", "description": "Department name" },
+        "location": { "type": "string", "description": "Office or branch location" },
+        "ipAddress": { "type": "string", "description": "Assigned IP address" },
+        "serialNumber": { "type": "string", "description": "Hardware manufacturer serial number" },
+        "manufacturer": { "type": "string", "description": "Brand / Manufacturer" },
+        "model": { "type": "string", "description": "Hardware model" },
+        "processor": { "type": "string", "description": "CPU specification" },
+        "purchaseDate": { "type": "string", "description": "Date of purchase (YYYY-MM-DD)" },
+        "condition": { "type": "string", "enum": ["NEW", "OLD"], "description": "Procured as New or Old" },
+        "storage": { "type": "string", "description": "Storage capacity e.g. 512GB NVMe SSD" },
+        "ram": { "type": "string", "description": "Memory e.g. 16GB DDR4" },
+        "windowsVersion": { "type": "string", "description": "OS version e.g. Windows 11 Pro 23H2" },
+        "msOffice": { "type": "string", "description": "Office version e.g. MS Office 2021 H&B" },
+        "escan": { "type": "string", "description": "eScan Antivirus status and license" },
+        "motherboard": { "type": "string", "description": "Motherboard model" },
+        "display": { "type": "string", "description": "Display specification" },
+        "displaySize": { "type": "string", "description": "Display size e.g. 24 inch" },
+        "lanCard": { "type": "string", "description": "LAN card / network adapter details" },
+        "upsBattery": { "type": "string", "description": "UPS / Battery health and model" },
+        "warrantyStart": { "type": "string", "description": "Warranty start date" },
+        "warrantyEnd": { "type": "string", "description": "Warranty end date" },
+        "lastServiceDate": { "type": "string", "description": "Last maintenance/service date" },
+        "remarks": { "type": "string", "description": "Additional notes and remarks" },
+        "assetAge": { "type": "string", "description": "Computed asset age" },
+        "expectedLife": { "type": "number", "description": "Expected lifespan in years" },
+        "expectedReplacementDate": { "type": "string", "description": "Expected replacement date" },
+        "depreciatedValue": { "type": "number", "description": "Current depreciated value in INR" },
+        "replacementAlert": { "type": "boolean", "description": "Flag if replacement needed" },
+        "warrantyAlert": { "type": "boolean", "description": "Flag if warranty expired or expiring" },
+        "vendor": { "type": "string", "description": "Supplier / Vendor name" },
+        "purchaseCost": { "type": "number", "description": "Original purchase cost in INR" },
+        "invoiceNumber": { "type": "string", "description": "Purchase invoice number" },
+        "amcStart": { "type": "string", "description": "AMC start date" },
+        "amcEnd": { "type": "string", "description": "AMC end date" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" },
+        "updatedBy": { "type": "string", "description": "Email or name of editor" }
+      },
+      "required": ["assetId", "company", "assetType", "status"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable audit trail of actions performed on assets",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Audit record ID" },
+        "assetDocId": { "type": "string", "description": "Target asset document ID" },
+        "assetId": { "type": "string", "description": "Asset ID string" },
+        "company": { "type": "string", "description": "Company code" },
+        "action": { "type": "string", "description": "Action performed: CREATED, UPDATED, ASSIGNED, RETURNED, SERVICED, RETIRED, SCRAPPED, IMPORTED" },
+        "details": { "type": "string", "description": "Detailed summary of changes" },
+        "performedBy": { "type": "string", "description": "User who performed action" },
+        "performedByEmail": { "type": "string", "description": "Email of user" },
+        "timestamp": { "type": "string", "description": "Timestamp of action" }
+      },
+      "required": ["action", "details", "performedBy", "timestamp"]
+    },
+    "ServiceRecord": {
+      "title": "ServiceRecord",
+      "description": "Maintenance, repair, and hardware upgrade logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Service record ID" },
+        "assetDocId": { "type": "string", "description": "Asset document ID" },
+        "assetId": { "type": "string", "description": "Asset ID string" },
+        "serviceDate": { "type": "string", "description": "Date of service" },
+        "serviceType": { "type": "string", "description": "Type: Routine, Repair, Upgrade, Warranty Claim" },
+        "vendor": { "type": "string", "description": "Service vendor or technician" },
+        "cost": { "type": "number", "description": "Service cost in INR" },
+        "issueDescription": { "type": "string", "description": "Reported issue" },
+        "actionTaken": { "type": "string", "description": "Resolution details" },
+        "partsReplaced": { "type": "string", "description": "Replaced parts" },
+        "nextFollowup": { "type": "string", "description": "Next scheduled maintenance" },
+        "recordedBy": { "type": "string", "description": "Recorded by user" },
+        "createdAt": { "type": "string", "description": "Timestamp" }
+      },
+      "required": ["assetDocId", "serviceDate", "serviceType", "actionTaken"]
+    },
+    "CompanySetting": {
+      "title": "CompanySetting",
+      "description": "Settings and organization master data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Company code AGIPL, ASSPL, ONYX" },
+        "name": { "type": "string", "description": "Full company name" },
+        "code": { "type": "string", "description": "Company short code" },
+        "address": { "type": "string", "description": "Office address" },
+        "contactPerson": { "type": "string", "description": "IT SPOC" },
+        "contactEmail": { "type": "string", "description": "IT contact email" },
+        "assetPrefix": { "type": "string", "description": "Prefix for asset tags" },
+        "updatedAt": { "type": "string", "description": "Last updated" }
+      },
+      "required": ["name", "code"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and RBAC role assignments"
+    },
+    "/assets/{assetId}": {
+      "schema": "Asset",
+      "description": "Master IT assets collection"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Audit trails for asset operations"
+    },
+    "/service_records/{recordId}": {
+      "schema": "ServiceRecord",
+      "description": "Maintenance and repair service history"
+    },
+    "/company_settings/{companyId}": {
+      "schema": "CompanySetting",
+      "description": "Organization configuration settings"
+    }
+  }
+}

@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isITManager() {
+      return isSignedIn() && (
+        request.auth.token.email == 'rahulprashad7@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'IT_MANAGER')
+      );
+    }
+
+    function isValidUser(data) {
+      return data.id is string &&
+             data.email is string && data.email.size() <= 150 &&
+             data.name is string && data.name.size() <= 150 &&
+             data.role in ['IT_MANAGER', 'IT_SUPPORT', 'AUDITOR'];
+    }
+
+    function isValidAsset(data) {
+      return data.assetId is string && data.assetId.size() > 0 && data.assetId.size() <= 100 &&
+             data.company in ['AGIPL', 'ASSPL', 'ONYX'] &&
+             data.assetType is string && data.assetType.size() <= 100 &&
+             data.status in ['ACTIVE', 'IN STOCK', 'SCRAPPED', 'UNDER REPAIR', 'RETIRED'];
+    }
+
+    function isValidAuditLog(data) {
+      return data.action is string && data.action.size() <= 100 &&
+             data.details is string && data.details.size() <= 5000 &&
+             data.performedBy is string && data.performedBy.size() <= 150;
+    }
+
+    function isValidServiceRecord(data) {
+      return data.assetDocId is string && data.assetDocId.size() <= 128 &&
+             data.serviceDate is string && data.serviceDate.size() <= 50 &&
+             data.serviceType is string && data.serviceType.size() <= 100 &&
+             data.actionTaken is string && data.actionTaken.size() <= 3000;
+    }
+
+    function isValidCompanySetting(data) {
+      return data.name is string && data.name.size() <= 200 &&
+             data.code in ['AGIPL', 'ASSPL', 'ONYX'];
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) &&
+                   (isITManager() || request.auth.uid == userId);
+      allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) &&
+                   (isITManager() || (request.auth.uid == userId && incoming().role == existing().role));
+      allow delete: if isITManager();
+    }
+
+    // Master Assets Collection
+    match /assets/{assetId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(assetId) && isValidAsset(incoming());
+      allow update: if isSignedIn() && isValidId(assetId) && isValidAsset(incoming());
+      // HARD DELETE IS STRICTLY FORBIDDEN (Assets must use RETIRED or SCRAPPED status)
+      allow delete: if false;
+    }
+
+    // Audit Logs Collection (Immutable write-only log)
+    match /audit_logs/{logId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(logId) && isValidAuditLog(incoming());
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Service & Maintenance Records Collection
+    match /service_records/{recordId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(recordId) && isValidServiceRecord(incoming());
+      allow update: if isSignedIn() && isValidId(recordId) && isValidServiceRecord(incoming());
+      allow delete: if isITManager();
+    }
+
+    // Company Settings Collection
+    match /company_settings/{companyId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isITManager() && isValidId(companyId) && isValidCompanySetting(incoming());
+      allow update: if isITManager() && isValidId(companyId) && isValidCompanySetting(incoming());
+      allow delete: if false;
+    }
+  }
+}
